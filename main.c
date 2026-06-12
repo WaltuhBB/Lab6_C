@@ -242,9 +242,16 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
         if (!flag_stop)
         {   
-            for (size_t i = 0; stack.Top; i++)
+            for (size_t i = 0; stack.Top && !flag_stop; i++)
             {
                 Pop(&stack, &rpn[j]);
+
+                if (rpn[j] == '(')
+                {
+                    res = 3;
+                    flag_stop = true;
+                }
+
                 j++;
             }
         }
