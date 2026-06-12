@@ -34,16 +34,8 @@ bool Push(Stack* st, int val)
             el -> inf = val;
             el -> next = NULL;
 
-            if (st -> Top == NULL)
-            {
-                st -> Top = el;
-            }
-            else
-            {
-                el -> next = st -> Top;
-                st -> Top = el;
-            }
-
+            el -> next = st -> Top;
+            st -> Top = el;
             st -> size++;
             
             res = true;
@@ -53,7 +45,11 @@ bool Push(Stack* st, int val)
     return res;
 }
 
+//Извлечь элемент из стека
+bool Pop()
+{
 
+}
 
 int main()
 {
