@@ -114,7 +114,10 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
         
         char Tab[256];
 
-        memset(Tab, -3, sizeof(Tab));
+        for (size_t i = 0; i < 256; i++)
+        {
+            Tab[i] = -3;
+        }
 
         //операнды
         for (char i = 'a'; i <= 'z'; i++)
