@@ -50,7 +50,7 @@ bool Pop(Stack* st, int* val)
 {
     bool res = false;
 
-    if (st && (st -> size) && val)
+    if (st && (st -> Top) && val)
     {
         *val = st -> Top -> inf;
 
@@ -61,6 +61,21 @@ bool Pop(Stack* st, int* val)
         free(tmp);
         st -> size--;
         
+        res = true;
+    }
+
+    return res;
+}
+
+//Получение элемента в вершине без выталкивания
+bool showTop(Stack st, int* val)
+{
+    bool res = false;
+
+    if (val && (st.Top))
+    {
+        *val = st.Top -> inf;
+
         res = true;
     }
 
@@ -80,9 +95,13 @@ int main()
     Push(&stack, 157);
 
     int val_to_pop;
+    int val_to_show;
 
     Pop(&stack, &val_to_pop);
     printf("pop_val: %d\n\n", val_to_pop);
+
+    showTop(stack, &val_to_show);
+    printf("show_val: %d\n\n", val_to_show);
 
     Node *ptr_i = NULL;
 
