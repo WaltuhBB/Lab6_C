@@ -266,6 +266,9 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 int main()
 {   
     char expression[100] = "a + b * c - d / (a + b)\0";
+    //char expression[100] = "a + b * c - d / (a + b\0";
+    //char expression[100] = "a + b * c - d / a + b)\0";
+    
     char rpn[100];
 
     int res = buildRevPolNot(expression, rpn, 100);
