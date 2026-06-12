@@ -46,9 +46,25 @@ bool Push(Stack* st, int val)
 }
 
 //Извлечь элемент из стека
-bool Pop()
+bool Pop(Stack* st, int* val)
 {
+    bool res = false;
 
+    if (st && (st -> size) && val)
+    {
+        *val = st -> Top -> inf;
+
+        Node *tmp = st -> Top;
+
+        st -> Top = tmp -> next;
+        
+        free(tmp);
+        st -> size--;
+        
+        res = true;
+    }
+
+    return res;
 }
 
 int main()
@@ -63,6 +79,11 @@ int main()
     Push(&stack, 46);
     Push(&stack, 157);
 
+    int val_to_pop;
+
+    Pop(&stack, &val_to_pop);
+    printf("pop_val: %d\n\n", val_to_pop);
+
     Node *ptr_i = NULL;
 
     if (stack.size == 0)
@@ -76,6 +97,8 @@ int main()
             printf("%d\n", ptr_i -> inf);
         }
     }
+
+    printf("\nstack size: %d ", stack.size);
 
     return 0;
 }
