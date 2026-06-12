@@ -128,16 +128,23 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
         {
             Tab[i] = -1;
         }
+        for (char i = '1'; i <= '9'; i++)
+        {
+            Tab[i] = -1;
+        }
 
         //скобки
         Tab['('] = 0;
         Tab[')'] = 1;
 
         //операции
-        Tab['+'] = 2;
-        Tab['-'] = 2;
-        Tab['*'] = 3;
-        Tab['/'] = 3;
+        Tab['+'] = 3;
+        Tab['-'] = 3;
+        Tab['*'] = 4;
+        Tab['/'] = 4;
+
+        //сравнительный приоритет
+        Tab['='] = 5;
 
         //Пробел
         Tab[' '] = -2;
@@ -207,8 +214,15 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                                 }
                             }
                             else
-                            {
-                                if (Tab[exp[i]] > Tab[top_val])
+                            {   
+                                int stack_p = Tab[top_val];
+
+                                if (top_val == '=')
+                                {
+                                    stack_p = 2;
+                                }
+                                
+                                if (Tab[exp[i]] > stack_p)
                                 {
                                     bool stack_check = Push(&stack, exp[i]);
 
@@ -220,12 +234,22 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                                 }
                                 else
                                 {
-                                    while (stack.Top && (Tab[top_val] >= Tab[exp[i]]))
+                                    while (stack.Top && (stack_p >= Tab[exp[i]]))
                                     {
                                         Pop(&stack, &rpn[j]);
                                         j++;   
                                         
                                         showTop(stack, &top_val);
+                                        
+                                        if (stack.Top)
+                                        {
+                                            stack_p = Tab[top_val];
+
+                                            if (top_val == '=')
+                                            {
+                                                stack_p = 2;
+                                            }
+                                        }
                                     }
 
                                     bool stack_check = Push(&stack, exp[i]);
@@ -268,9 +292,11 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
 int main()
 {   
-    char expression[100] = "a + b * c - d / (a + b)\0";
+    //char expression[100] = "a + b * c - d / (a + b)\0";
     //char expression[100] = "a + b * c - d / (a + b\0";
     //char expression[100] = "a + b * c - d / a + b)\0";
+
+    char expression[100] = "a = b = c - d - 1\0";
     
     char rpn[100];
 
