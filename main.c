@@ -82,6 +82,24 @@ bool showTop(Stack st, int* val)
     return res;
 }
 
+//Очистка стека
+void clearStack(Stack* st)
+{
+    if (st)
+    {
+        Node *tmp;
+
+        while (st -> Top)
+        {
+            tmp = st -> Top;
+            st -> Top = tmp -> next;
+            free(tmp);
+        }
+
+        st -> size = 0;
+    }
+}
+
 int main()
 {
     Stack stack;
@@ -103,9 +121,11 @@ int main()
     showTop(stack, &val_to_show);
     printf("show_val: %d\n\n", val_to_show);
 
+    //clearStack(&stack);
+
     Node *ptr_i = NULL;
 
-    if (stack.size == 0)
+    if (stack.Top == NULL)
     {
         printf("Stack is empty\n");
     }
@@ -118,6 +138,8 @@ int main()
     }
 
     printf("\nstack size: %d ", stack.size);
+
+    clearStack(&stack);
 
     return 0;
 }
