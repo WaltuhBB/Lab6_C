@@ -128,7 +128,7 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
         {
             Tab[i] = -1;
         }
-        for (char i = '1'; i <= '9'; i++)
+        for (char i = '0'; i <= '9'; i++)
         {
             Tab[i] = -1;
         }
@@ -156,6 +156,7 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
         bool flag_stop = false;
 
         size_t j = 0;
+        char prev_char = 0;
 
         //трансляция в ПОЛИЗ
         for (size_t i = 0; (exp[i] != '\0') && !flag_stop; i++)
@@ -169,6 +170,23 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
             {
                 if (Tab[exp[i]] != -2)
                 {
+                    if (exp[i] == '-')
+                    {
+                        if (prev_char == 0 || Tab[prev_char] >= 3 || prev_char == '(')
+                        {
+                            if (j < len_rpn -1)
+                            {
+                                rpn[j] = '0';
+                                j++;
+                            }
+                            else
+                            {
+                                res = -1;
+                                flag_stop = true;
+                            }
+                        }
+                    }
+                    
                     if(Tab[exp[i]] == -1)
                     {
                         rpn[j] = exp[i];
@@ -273,6 +291,8 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                             }
                         }
                     }
+
+                    prev_char = exp[i];
                 }
             }
         }
@@ -302,10 +322,12 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
 int main()
 {   
-    char expression[100] = "a + b * c - d / (a + b)\0";
+    //char expression[100] = "a + b * c - d / (a + b)\0";
     //char expression[100] = "a + b * c - d / (a + b\0";
     //char expression[100] = "a + b * c - d / a + b)\0";
     //char expression[100] = "-()()1\0";
+
+    char expression[100] = "y = a + -1\0";
 
     //char expression[100] = "a = b = c - d - 1\0";
     
