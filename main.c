@@ -335,13 +335,24 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 }
 
 //Вычислить ПОЛИЗ
-int solveRevPolNot(char* rpn, double* calc_res)
+int solveRevPolNot(char* rpn, double* calc_res, double* Tab_val, int* Tab_occ)
 {
     int res = -1;
 
-    if (rpn && calc_res)
+    if (rpn && calc_res && Tab_val && Tab_occ)
     {
         res = 0;
+
+        int eq_count = 0;
+        for (size_t k = 0; rpn[k] != '\0'; k++)
+        {
+            if (rpn[k] == '=')
+            {
+                eq_count++;
+            }
+        }
+        
+        int var_index = 0;
 
         Stack stack;
         stack.Top = NULL;
@@ -365,67 +376,115 @@ int solveRevPolNot(char* rpn, double* calc_res)
             }
             else
             {
-                if (rpn[i] == '+' || rpn[i] == '-' || rpn[i] == '*' || rpn[i] == '/')
+                if (('a' <= rpn[i] && 'z' >= rpn[i]) || ('A' <= rpn[i] && 'Z' >= rpn[i]))
                 {
-                    double poped_op_1;
-                    double poped_op_2;
+                    var_index++;
 
-                    if (!stack.Top)
+                    if (var_index <= eq_count)
                     {
-                        res = 2;
-                        flag_stop = true;
+                        double op_val = (double)rpn[i];
+
+                        bool check_stack = Push(&stack, op_val);
+
+                        if (!check_stack)
+                        {
+                            res = 1;
+                            flag_stop = true;
+                        }
                     }
                     else
                     {
-                        if (stack.size >= 2)
+                        if (Tab_occ[(unsigned char)rpn[i]] == 0)
                         {
-                            Pop(&stack, NULL, &poped_op_1);
-                            Pop(&stack, NULL, &poped_op_2);
+                            res = 2;
+                            flag_stop = true;
+                        }
+                        else
+                        {
+                            double op_val = Tab_val[(unsigned char)rpn[i]];
 
-                            if (rpn[i] == '+')
-                            {
-                                poped_op_1 = poped_op_2 + poped_op_1;
-                            }
-                            if (rpn[i] == '-')
-                            {
-                                poped_op_1 = poped_op_2 - poped_op_1;
-                            }
-                            if (rpn[i] == '*')
-                            {
-                                poped_op_1 = poped_op_2 * poped_op_1;
-                            }
-                            if (rpn[i] == '/')
-                            {
-                                if (poped_op_1 == 0)
-                                {
-                                    res = 2;
-                                    flag_stop = true;
-                                }
-                                else
-                                {
-                                    poped_op_1 = poped_op_2 / poped_op_1;
-                                }
-                            }
+                            bool check_stack = Push(&stack, op_val);
 
-                            bool stack_check = Push(&stack, poped_op_1);
-
-                            if (!stack_check)
+                            if (!check_stack)
                             {
                                 res = 1;
                                 flag_stop = true;
                             }
                         }
-                        else
-                        {
-                            res = 2;
-                            flag_stop = true;
-                        }
                     }
                 }
                 else
                 {
-                    res = 2;
-                    flag_stop = true;
+                    if (rpn[i] == '+' || rpn[i] == '-' || rpn[i] == '*' || rpn[i] == '/' || rpn[i] == '=')
+                    {
+                        double poped_op_1;
+                        double poped_op_2;
+
+                        if (!stack.Top)
+                        {
+                            res = 2;
+                            flag_stop = true;
+                        }
+                        else
+                        {
+                            if (stack.size >= 2)
+                            {
+                                Pop(&stack, NULL, &poped_op_1);
+                                Pop(&stack, NULL, &poped_op_2);
+
+                                if (rpn[i] == '=')
+                                {
+                                    char var_name = (char)poped_op_2;
+                                    
+                                    Tab_val[(unsigned char)var_name] = poped_op_1;
+                                    Tab_occ[(unsigned char)var_name] = 1;
+                                }
+
+                                if (rpn[i] == '+')
+                                {
+                                    poped_op_1 = poped_op_2 + poped_op_1;
+                                }
+                                if (rpn[i] == '-')
+                                {
+                                    poped_op_1 = poped_op_2 - poped_op_1;
+                                }
+                                if (rpn[i] == '*')
+                                {
+                                    poped_op_1 = poped_op_2 * poped_op_1;
+                                }
+                                if (rpn[i] == '/')
+                                {
+                                    if (poped_op_1 == 0)
+                                    {
+                                        res = 2;
+                                        flag_stop = true;
+                                    }
+                                    else
+                                    {
+                                        poped_op_1 = poped_op_2 / poped_op_1;
+                                    }
+                                }
+
+                                bool stack_check = Push(&stack, poped_op_1);
+
+                                if (!stack_check)
+                                {
+                                    res = 1;
+                                    flag_stop = true;
+                                }
+                            }
+                            else
+                            {
+                                res = 2;
+                                flag_stop = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        res = 2;
+                        flag_stop = true;
+                    }
                 }
             }
         }
@@ -470,7 +529,10 @@ int main()
     
     printf("solve tests: \n\n");
     
-    char exps[7][100] = {
+    double Tab_val[128];
+    int Tab_occ[128] = {0};
+    
+    char exps[12][100] = {
         
         "-2\0",
         "2 + 2 * 2\0",
@@ -478,18 +540,24 @@ int main()
         "22 + 22\0",
         "2 ** 2\0",
         "2 / 2\0",
-        "2 / 0\0"
+        "2 / 0\0",
+
+        "a = 2\0",
+        "b = a\0",
+        "c = b\0",
+        "d = c\0",
+        "a + b * c - d / (a + b)\0"
     
     };
 
-    for (size_t i = 0; i < 7; i++)
+    for (size_t i = 0; i < 12; i++)
     {
         char rpns[100];
         double calc_res;
 
         buildRevPolNot(exps[i], rpns, 500);
 
-        int ret_code = solveRevPolNot((char*)&rpns, &calc_res);
+        int ret_code = solveRevPolNot((char*)&rpns, &calc_res, Tab_val, Tab_occ);
 
         if (ret_code == 0)
         {
