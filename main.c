@@ -194,18 +194,28 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                             if (exp[i] == ')')
                             {
                                 char for_bracket;
+                                size_t count_while = 0;
 
                                 while (stack.Top && top_val != '(')
                                 {
                                     Pop(&stack, &rpn[j]);
                                     showTop(stack, &top_val);
 
+                                    count_while++;
                                     j++;
                                 }
 
                                 if (stack.Top)
                                 {
-                                    Pop(&stack, &for_bracket);
+                                    if (!count_while)
+                                    {
+                                        res = 3;
+                                        flag_stop = true;
+                                    }
+                                    else
+                                    {
+                                        Pop(&stack, &for_bracket);
+                                    }
                                 }
                                 else
                                 {
@@ -292,11 +302,12 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
 int main()
 {   
-    //char expression[100] = "a + b * c - d / (a + b)\0";
+    char expression[100] = "a + b * c - d / (a + b)\0";
     //char expression[100] = "a + b * c - d / (a + b\0";
     //char expression[100] = "a + b * c - d / a + b)\0";
+    //char expression[100] = "-()()1\0";
 
-    char expression[100] = "a = b = c - d - 1\0";
+    //char expression[100] = "a = b = c - d - 1\0";
     
     char rpn[100];
 
