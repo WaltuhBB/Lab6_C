@@ -334,8 +334,121 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
     return res;
 }
 
+//Вычислить ПОЛИЗ
+int solveRevPolNot(char* rpn, double* calc_res)
+{
+    int res = -1;
+
+    if (rpn && calc_res)
+    {
+        res = 0;
+
+        Stack stack;
+        stack.Top = NULL;
+        stack.size = 0;
+
+        bool flag_stop = false;
+
+        for (size_t i = 0; rpn[i] != '\0' && !flag_stop; i++)
+        {
+            if ('0' <= rpn[i] && '9' >= rpn[i])
+            {
+                double op_val = (double)(rpn[i] - '0');
+
+                bool check_stack = Push(&stack, op_val);
+
+                if (!check_stack)
+                {
+                    res = 1;
+                    flag_stop = true;
+                }
+            }
+            else
+            {
+                if (rpn[i] == '+' || rpn[i] == '-' || rpn[i] == '*' || rpn[i] == '/')
+                {
+                    double poped_op_1;
+                    double poped_op_2;
+
+                    if (!stack.Top)
+                    {
+                        res = 2;
+                        flag_stop = true;
+                    }
+                    else
+                    {
+                        if (stack.size >= 2)
+                        {
+                            Pop(&stack, NULL, &poped_op_1);
+                            Pop(&stack, NULL, &poped_op_2);
+
+                            if (rpn[i] == '+')
+                            {
+                                poped_op_1 = poped_op_2 + poped_op_1;
+                            }
+                            if (rpn[i] == '-')
+                            {
+                                poped_op_1 = poped_op_2 - poped_op_1;
+                            }
+                            if (rpn[i] == '*')
+                            {
+                                poped_op_1 = poped_op_2 * poped_op_1;
+                            }
+                            if (rpn[i] == '/')
+                            {
+                                if (poped_op_1 == 0)
+                                {
+                                    res = 2;
+                                    flag_stop = true;
+                                }
+                                else
+                                {
+                                    poped_op_1 = poped_op_2 / poped_op_1;
+                                }
+                            }
+
+                            bool stack_check = Push(&stack, poped_op_1);
+
+                            if (!stack_check)
+                            {
+                                res = 1;
+                                flag_stop = true;
+                            }
+                        }
+                        else
+                        {
+                            res = 2;
+                            flag_stop = true;
+                        }
+                    }
+                }
+                else
+                {
+                    res = 2;
+                    flag_stop = true;
+                }
+            }
+        }
+
+        if (stack.size == 1)
+        {
+            Pop(&stack, NULL, calc_res);
+        }
+        else
+        {
+            res = 2;
+        }
+
+        clearStack(&stack);
+    }
+
+    return res;
+}
+
 int main()
 {   
+    printf("build test:\n\n");
+    
     char expression[100] = "a + b * c - d / (a + b)\0";
     //char expression[100] = "a + b * c - d / (a + b\0";
     //char expression[100] = "a + b * c - d / a + b)\0";
@@ -350,6 +463,43 @@ int main()
     int res = buildRevPolNot(expression, rpn, 100);
 
     printf("return code: %d\nexpression: %s\nrpn: %s ", res, expression, rpn);
+
+    
+    
+    printf("\n\n");
+    
+    printf("solve tests: \n\n");
+    
+    char exps[7][100] = {
+        
+        "-2\0",
+        "2 + 2 * 2\0",
+        "(2 + 2) * 2\0",
+        "22 + 22\0",
+        "2 ** 2\0",
+        "2 / 2\0",
+        "2 / 0\0"
+    
+    };
+
+    for (size_t i = 0; i < 7; i++)
+    {
+        char rpns[100];
+        double calc_res;
+
+        buildRevPolNot(exps[i], rpns, 500);
+
+        int ret_code = solveRevPolNot((char*)&rpns, &calc_res);
+
+        if (ret_code == 0)
+        {
+            printf("code: 0\nres: %lf\nexpression: %s\nrpn: %s\n\n", calc_res, exps[i], rpns);
+        }
+        else
+        {
+            printf("error code: %d\nexpression: %s\nrpn: %s\n\n", ret_code, exps[i], rpns);
+        }
+    }
 
     return 0;
 }
