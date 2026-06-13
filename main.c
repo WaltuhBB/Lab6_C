@@ -6,7 +6,7 @@
 //Описание структур стека
 struct NodeList
 {
-    char inf;
+    double inf;
     struct NodeList* next;
 };
 
@@ -22,7 +22,7 @@ typedef struct StackList Stack;
 //Функции для работы со стеком
 
 //Добавить элемент в стек
-bool Push(Stack* st, char val)
+bool Push(Stack* st, double val)
 {
     bool res = false;
 
@@ -47,13 +47,20 @@ bool Push(Stack* st, char val)
 }
 
 //Извлечь элемент из стека
-bool Pop(Stack* st, char* val)
+bool Pop(Stack* st, char* val_c, double* val_d)
 {
     bool res = false;
 
-    if (st && (st -> Top) && val)
+    if (st && (st -> Top) && ((val_c && !val_d) || (!val_c && val_d)))
     {
-        *val = st -> Top -> inf;
+        if (val_c)
+        {
+            *val_c = st -> Top -> inf;
+        }
+        else
+        {
+            *val_d = st -> Top -> inf;
+        }
 
         Node *tmp = st -> Top;
 
@@ -69,13 +76,20 @@ bool Pop(Stack* st, char* val)
 }
 
 //Получение элемента в вершине без выталкивания
-bool showTop(Stack st, char* val)
+bool showTop(Stack st, char* val_c, double* val_d)
 {
     bool res = false;
 
-    if (val && (st.Top))
+    if (((val_c && !val_d) || (!val_c && val_d)) && (st.Top))
     {
-        *val = st.Top -> inf;
+        if (val_c)
+        {
+            *val_c = st.Top -> inf;
+        }
+        else
+        {
+            *val_d = st.Top -> inf;
+        }
 
         res = true;
     }
@@ -207,7 +221,7 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                         else
                         {
                             char top_val;
-                            showTop(stack, &top_val);
+                            showTop(stack, &top_val, NULL);
 
                             if (exp[i] == ')')
                             {
@@ -216,8 +230,8 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
                                 while (stack.Top && top_val != '(')
                                 {
-                                    Pop(&stack, &rpn[j]);
-                                    showTop(stack, &top_val);
+                                    Pop(&stack, &rpn[j], NULL);
+                                    showTop(stack, &top_val, NULL);
 
                                     count_while++;
                                     j++;
@@ -232,7 +246,7 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                                     }
                                     else
                                     {
-                                        Pop(&stack, &for_bracket);
+                                        Pop(&stack, &for_bracket, NULL);
                                     }
                                 }
                                 else
@@ -264,10 +278,10 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
                                 {
                                     while (stack.Top && (stack_p >= Tab[exp[i]]))
                                     {
-                                        Pop(&stack, &rpn[j]);
+                                        Pop(&stack, &rpn[j], NULL);
                                         j++;   
                                         
-                                        showTop(stack, &top_val);
+                                        showTop(stack, &top_val, NULL);
                                         
                                         if (stack.Top)
                                         {
@@ -301,7 +315,7 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
         {   
             for (size_t i = 0; stack.Top && !flag_stop; i++)
             {
-                Pop(&stack, &rpn[j]);
+                Pop(&stack, &rpn[j], NULL);
 
                 if (rpn[j] == '(')
                 {
@@ -322,12 +336,12 @@ int buildRevPolNot(char* exp, char* rpn, size_t len_rpn)
 
 int main()
 {   
-    //char expression[100] = "a + b * c - d / (a + b)\0";
+    char expression[100] = "a + b * c - d / (a + b)\0";
     //char expression[100] = "a + b * c - d / (a + b\0";
     //char expression[100] = "a + b * c - d / a + b)\0";
     //char expression[100] = "-()()1\0";
 
-    char expression[100] = "y = a + -1\0";
+    //char expression[100] = "y = a + -1\0";
 
     //char expression[100] = "a = b = c - d - 1\0";
     
